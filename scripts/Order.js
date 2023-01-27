@@ -2,6 +2,29 @@ import Menu from './Menu.js';
 
 const Order = {
     cart: [],
+    openDB: async () => {
+        return await idb.openDB("cm-storage", 1, {
+            async upgrade(db) {
+                await db.createObjectStore("order");
+            }
+        })
+    },
+    load: async () => {
+        const db = await Order.openDB();
+        const cartString = await db.get("order", "cart");
+        if (cartString) {
+            try {
+                Order.cart = JSON.parse(cartString);  
+            } catch (e) {
+                console.error("Data in Storage is corrupted");
+            }
+        }
+        Order.render();
+    },
+    save: async () => {
+        const db = await Order.openDB();
+        await db.put("order", JSON.stringify(Order.cart), "cart")
+    },
     add: async id => {
         const product = await Menu.getProductById(id);
         const results = Order.cart.filter(prodInCart => prodInCart.product.id==id);
@@ -23,6 +46,7 @@ const Order = {
         Order.render();
     },
     render: () => {
+        Order.save();
         if (Order.cart.length==0) {
             document.querySelector("#order").innerHTML = `
                 <p class="empty">Your order is empty</p>
@@ -60,5 +84,6 @@ const Order = {
         }
     }
 }
+Order.load();
 window.Order = Order; // make it "public"
 export default Order;
