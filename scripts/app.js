@@ -2,6 +2,8 @@ import Menu from './Menu.js';
 import Order from './Order.js';
 import Router from './Router.js';
 
+navigator.serviceWorker.register("/serviceworker.js");
+
 // Request persistance storage
 (async function() {
     // note that navigator.storage is not available in un-secured context.
