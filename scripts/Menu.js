@@ -5,6 +5,14 @@ const Menu = {
     load: async () => {
         Menu.data = await API.fetchMenu();
         Menu.render();
+
+        // Cache images
+        if (Menu.data) {
+            const imageCache = await caches.open("cm-images");
+            Menu.data.forEach(category => imageCache.addAll(
+                category.products.map(product=>`/data/images/${product.image}`)
+            ));
+        }
     },
     getProductById: async id => {
         if (Menu.data==null) {
